@@ -761,22 +761,45 @@ document.addEventListener("change",actualizarBarra);
 
 function terminarExamen(){
 
-let aciertos=0;
+let aciertos = 0;
+let detalle = "";
 
 preguntas.forEach((q,index)=>{
 
 let seleccion =
 document.querySelector(`input[name=q${index}]:checked`);
 
-if(seleccion &&
-parseInt(seleccion.value)===q.correcta){
+let respuestaUsuario =
+seleccion ? parseInt(seleccion.value) : -1;
+
+if(respuestaUsuario === q.correcta){
+
 aciertos++;
+
+}else{
+
+detalle += `
+<div style="margin-bottom:15px;padding:10px;border-left:4px solid #d62828;background:#fff5f5;">
+<b>${q.pregunta}</b><br>
+
+Tu respuesta:
+${respuestaUsuario >= 0
+? q.opciones[respuestaUsuario]
+: "Sin responder"}
+<br>
+
+<span style="color:green;">
+Respuesta correcta:
+${q.opciones[q.correcta]}
+</span>
+</div>
+`;
+
 }
 
 });
 
-let errores =
-preguntas.length-aciertos;
+let errores = preguntas.length - aciertos;
 
 let porcentaje =
 ((aciertos/preguntas.length)*100).toFixed(1);
@@ -784,15 +807,29 @@ let porcentaje =
 const resultado =
 document.getElementById("resultado");
 
-resultado.style.display="block";
+resultado.style.display = "block";
 
-resultado.innerHTML=`
+resultado.innerHTML = `
 <h2>Resultado</h2>
+
 <p><b>Aciertos:</b> ${aciertos}</p>
+
 <p><b>Errores:</b> ${errores}</p>
+
 <p><b>Porcentaje:</b> ${porcentaje}%</p>
+
+<hr>
+
+<h3>Preguntas incorrectas</h3>
+
+${detalle || "<p>¡Perfecto! No hubo errores.</p>"}
 `;
-window.scrollTo(0,document.body.scrollHeight);
+
+window.scrollTo(
+0,
+document.body.scrollHeight
+);
+
 }
 
 let tiempo=10800;
