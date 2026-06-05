@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador UANL V2</title>
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+background:#f4f6f9;
+margin:0;
+padding:20px;
+}
+
+.container{
+max-width:1000px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,.1);
+}
+
+h1{
+text-align:center;
+}
+
+#timer{
+font-size:22px;
+font-weight:bold;
+text-align:center;
+color:#d62828;
+margin-bottom:20px;
+}
+
+.progress{
+width:100%;
+height:20px;
+background:#ddd;
+border-radius:10px;
+overflow:hidden;
+margin-bottom:20px;
+}
+
+.progress-bar{
+height:100%;
+width:0%;
+background:#2a9d8f;
+}
+
+.section-title{
+margin-top:40px;
+padding:10px;
+background:#264653;
+color:white;
+border-radius:6px;
+}
+
+.question{
+border:1px solid #ddd;
+padding:15px;
+margin-bottom:20px;
+border-radius:8px;
+}
+
+.option{
+margin:8px 0;
+}
+
+button{
+display:block;
+margin:30px auto;
+padding:15px 30px;
+font-size:18px;
+background:#2a9d8f;
+color:white;
+border:none;
+border-radius:8px;
+cursor:pointer;
+}
+
+button:hover{
+background:#21867a;
+}
+
+.correct{
+background:#d4edda;
+}
+
+.incorrect{
+background:#f8d7da;
+}
+
+#resultado{
+display:none;
+margin-top:30px;
+padding:20px;
+border:2px solid #2a9d8f;
+border-radius:10px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:15px;
+}
+
+th,td{
+border:1px solid #ccc;
+padding:10px;
+text-align:center;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Simulador de Admisión UANL</h1>
+
+<div id="timer">03:00:00</div>
+
+<div class="progress">
+<div id="progressBar" class="progress-bar"></div>
+</div>
+
+<form id="quizForm"></form>
+
+<button onclick="terminarExamen()">
+Terminar examen
+</button>
+
+<div id="resultado"></div>
+
+</div>
+
+<script>
+
+const preguntas = [
+
+{
+area:"📖 Español",
+pregunta:"¿Cuál es la idea principal de un texto?",
+opciones:[
+"Un detalle secundario",
+"El mensaje central que desarrolla el autor",
+"Una opinión del lector",
+"El título del texto"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"Sinónimo de 'alegre'.",
+opciones:[
+"Triste",
+"Contento",
+"Molesto",
+"Enojado"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"Antónimo de 'escaso'.",
+opciones:[
+"Poco",
+"Abundante",
+"Débil",
+"Limitado"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Cuál palabra está correctamente escrita?",
+opciones:[
+"Examen",
+"Ezamen",
+"Hexamen",
+"Exhámen"
+],
+correcta:0
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Qué signo indica una pregunta en español?",
+opciones:[
+"()",
+"¿?",
+"[]",
+"<>"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Cuál es el sujeto en 'Pedro juega fútbol'?",
+opciones:[
+"Juega",
+"Fútbol",
+"Pedro",
+"Ninguno"
+],
+correcta:2
+},
+
+{
+area:"📖 Español",
+pregunta:"Sinónimo de 'rápido'.",
+opciones:[
+"Veloz",
+"Lento",
+"Pesado",
+"Quieto"
+],
+correcta:0
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Cuál es el plural de 'luz'?",
+opciones:[
+"Luzes",
+"Luzs",
+"Luces",
+"Lucez"
+],
+correcta:2
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Qué tipo de texto busca informar sobre hechos reales y actuales?",
+opciones:[
+"Poema",
+"Noticia",
+"Leyenda",
+"Cuento"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Qué es una paráfrasis?",
+opciones:[
+"Copiar exactamente un texto",
+"Expresar una idea con palabras diferentes",
+"Resumir con una sola palabra",
+"Traducir un idioma"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"Sinónimo de 'persuadir'.",
+opciones:[
+"Convencer",
+"Ocultar",
+"Destruir",
+"Olvidar"
+],
+correcta:0
+},
+
+{
+area:"📖 Español",
+pregunta:"Antónimo de 'valiente'.",
+opciones:[
+"Audaz",
+"Cobarde",
+"Fuerte",
+"Inteligente"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Cuál oración está escrita correctamente?",
+opciones:[
+"Hubieron muchas personas",
+"Hubo muchas personas",
+"Habieron personas",
+"Hubieron asistentes"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Qué función tiene un texto argumentativo?",
+opciones:[
+"Describir",
+"Narrar",
+"Convencer mediante razones",
+"Entretener"
+],
+correcta:2
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Cuál es un adverbio?",
+opciones:[
+"Correr",
+"Rápidamente",
+"Casa",
+"Grande"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"La palabra 'árbol' es:",
+opciones:[
+"Aguda",
+"Grave",
+"Esdrújula",
+"Sobresdrújula"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Cuál palabra contiene un hiato?",
+opciones:[
+"Tierra",
+"Ciudad",
+"Poeta",
+"Puerta"
+],
+correcta:2
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Cuál es un homófono de 'votar'?",
+opciones:[
+"Botar",
+"Volar",
+"Rotar",
+"Notar"
+],
+correcta:0
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Qué significa inferir en una lectura?",
+opciones:[
+"Copiar información",
+"Memorizar palabras",
+"Deducir información implícita",
+"Leer rápidamente"
+],
+correcta:2
+},
+
+{
+area:"📖 Español",
+pregunta:"La finalidad principal de una reseña es:",
+opciones:[
+"Dar instrucciones",
+"Narrar una historia",
+"Evaluar y comentar una obra",
+"Presentar estadísticas"
+],
+correcta:2
+},
+
+,
+{
+area:"📖 Español",
+pregunta:"¿Cuál es la intención principal de un texto expositivo?",
+opciones:[
+"Convencer",
+"Informar",
+"Entretener",
+"Criticar"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"Sinónimo de 'eficiente'.",
+opciones:[
+"Inútil",
+"Capaz",
+"Débil",
+"Torpe"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"Antónimo de 'optimista'.",
+opciones:[
+"Positivo",
+"Pesimista",
+"Confiado",
+"Alegre"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Cuál palabra está correctamente escrita?",
+opciones:[
+"Conclución",
+"Conclusión",
+"Concluzión",
+"Conclucion"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Qué elemento indica el tema general de un texto?",
+opciones:[
+"La conclusión",
+"La idea principal",
+"El ejemplo",
+"El sujeto"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"En la oración 'Ana compró un libro', el verbo es:",
+opciones:[
+"Ana",
+"Compró",
+"Libro",
+"Un"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Qué significa contexto?",
+opciones:[
+"Una definición",
+"El entorno que rodea una situación o palabra",
+"Una opinión",
+"Un resumen"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Cuál es un texto instructivo?",
+opciones:[
+"Receta de cocina",
+"Poema",
+"Novela",
+"Leyenda"
+],
+correcta:0
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Qué es una conclusión?",
+opciones:[
+"El inicio del texto",
+"Una opinión ajena",
+"La parte final que resume ideas",
+"Una cita textual"
+],
+correcta:2
+},
+
+{
+area:"📖 Español",
+pregunta:"La palabra 'fácilmente' pertenece a la categoría de:",
+opciones:[
+"Sustantivo",
+"Verbo",
+"Adverbio",
+"Pronombre"
+],
+correcta:2
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Qué recurso utiliza palabras con significado parecido?",
+opciones:[
+"Antónimo",
+"Sinónimo",
+"Hiato",
+"Diptongo"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Cuál palabra es aguda?",
+opciones:[
+"Árbol",
+"Canción",
+"Lápiz",
+"Jóvenes"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Cuál es la finalidad de una noticia?",
+opciones:[
+"Informar hechos",
+"Expresar sentimientos",
+"Dar instrucciones",
+"Convencer"
+],
+correcta:0
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Qué significa deducir información en una lectura?",
+opciones:[
+"Copiar datos",
+"Adivinar sin bases",
+"Obtener una conclusión a partir de pistas",
+"Memorizar"
+],
+correcta:2
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Cuál palabra contiene diptongo?",
+opciones:[
+"Poeta",
+"Aéreo",
+"Ciudad",
+"Caoba"
+],
+correcta:2
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Qué tipo de palabra sustituye al sustantivo?",
+opciones:[
+"Adjetivo",
+"Pronombre",
+"Adverbio",
+"Artículo"
+],
+correcta:1
+},
+
+{
+area:"📖 Español",
+pregunta:"En 'Los estudiantes aprobaron el examen', el sujeto es:",
+opciones:[
+"Aprobaron",
+"El examen",
+"Los estudiantes",
+"Estudiantes aprobaron"
+],
+correcta:2
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Cuál es una característica de los textos científicos?",
+opciones:[
+"Uso de lenguaje preciso",
+"Uso de fantasía",
+"Lenguaje informal",
+"Opiniones sin evidencia"
+],
+correcta:0
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Qué significa argumentar?",
+opciones:[
+"Presentar razones para apoyar una idea",
+"Memorizar información",
+"Copiar un texto",
+"Traducir palabras"
+],
+correcta:0
+},
+
+{
+area:"📖 Español",
+pregunta:"¿Cuál es la función principal de los signos de puntuación?",
+opciones:[
+"Adornar el texto",
+"Separar y organizar ideas",
+"Alargar oraciones",
+"Crear títulos"
+],
+correcta:1
+}
+
+/*
+Aquí irán todos los bloques:
+
+Bloque E1
+Bloque E2
+Bloque E3
+Bloque E4
+
+Bloque M1
+Bloque M2
+Bloque M3
+Bloque M4
+
+Bloque C1
+Bloque C2
+
+Bloque S1
+Bloque S2
+*/
+
+];
+
+const form = document.getElementById("quizForm");
+
+let areaActual = "";
+
+preguntas.forEach((q,index)=>{
+
+if(q.area !== areaActual){
+
+areaActual = q.area;
+
+const titulo =
+document.createElement("h2");
+
+titulo.className = "section-title";
+
+titulo.innerText = areaActual;
+
+form.appendChild(titulo);
+
+}
+
+const div =
+document.createElement("div");
+
+div.className = "question";
+
+let html =
+`<h3>${index+1}. ${q.pregunta}</h3>`;
+
+q.opciones.forEach((op,i)=>{
+
+html += `
+<div class="option">
+<label>
+<input type="radio"
+name="q${index}"
+value="${i}">
+${op}
+</label>
+</div>
+`;
+
+});
+
+div.innerHTML = html;
+
+form.appendChild(div);
+
+});
+
+document.addEventListener(
+"change",
+actualizarBarra
+);
+
+function actualizarBarra(){
+
+const respondidas =
+document.querySelectorAll(
+'input[type=radio]:checked'
+).length;
+
+const porcentaje =
+(respondidas/preguntas.length)*100;
+
+document.getElementById(
+"progressBar"
+).style.width =
+porcentaje + "%";
+
+}
+
+function terminarExamen(){
+
+document.querySelector("button").disabled = true;
+
+let aciertos = 0;
+
+let estadisticas = {};
+
+preguntas.forEach((q,index)=>{
+
+if(!estadisticas[q.area]){
+
+estadisticas[q.area]={
+correctas:0,
+total:0
+};
+
+}
+
+estadisticas[q.area].total++;
+
+let seleccion =
+document.querySelector(
+`input[name=q${index}]:checked`
+);
+
+const bloque =
+document.querySelectorAll(
+".question"
+)[index];
+
+if(
+seleccion &&
+parseInt(seleccion.value)
+=== q.correcta
+){
+
+aciertos++;
+
+estadisticas[q.area]
+.correctas++;
+
+bloque.classList.add(
+"correct"
+);
+
+}else{
+
+bloque.classList.add(
+"incorrect"
+);
+
+}
+
+});
+
+let errores =
+preguntas.length - aciertos;
+
+let porcentaje =
+(
+(aciertos/preguntas.length)
+*100
+).toFixed(1);
+
+let detalle = "";
+
+for(let area in estadisticas){
+
+const datos =
+estadisticas[area];
+
+const porcentajeArea =
+(
+(datos.correctas /
+datos.total)
+*100
+).toFixed(1);
+
+detalle += `
+<tr>
+<td>${area}</td>
+<td>${datos.correctas}/${datos.total}</td>
+<td>${porcentajeArea}%</td>
+</tr>
+`;
+
+}
+
+document.getElementById(
+"resultado"
+).style.display =
+"block";
+
+document.getElementById(
+"resultado"
+).innerHTML = `
+
+<h2>Resultado General</h2>
+
+<p><b>Aciertos:</b>
+${aciertos}</p>
+
+<p><b>Errores:</b>
+${errores}</p>
+
+<p><b>Porcentaje:</b>
+${porcentaje}%</p>
+
+<h3>Desempeño por área</h3>
+
+<table>
+
+<tr>
+<th>Área</th>
+<th>Aciertos</th>
+<th>Porcentaje</th>
+</tr>
+
+${detalle}
+
+</table>
+
+`;
+
+window.scrollTo(0,0);
+
+}
+
+let tiempo = 10800;
+
+setInterval(()=>{
+
+let h =
+Math.floor(tiempo/3600);
+
+let m =
+Math.floor(
+(tiempo%3600)/60
+);
+
+let s =
+tiempo%60;
+
+document.getElementById(
+"timer"
+).innerText =
+
+String(h).padStart(2,"0")
++ ":" +
+String(m).padStart(2,"0")
++ ":" +
+String(s).padStart(2,"0");
+
+if(tiempo>0){
+tiempo--;
+}
+
+},1000);
+
+</script>
+
+</body>
+</html>
