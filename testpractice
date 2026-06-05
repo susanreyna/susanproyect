@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador UANL</title>
+
+<style>
+body{
+font-family:Arial, sans-serif;
+background:#f4f6f9;
+margin:0;
+padding:20px;
+}
+
+.container{
+max-width:1000px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,.1);
+}
+
+h1{
+text-align:center;
+}
+
+#timer{
+font-size:22px;
+font-weight:bold;
+text-align:center;
+color:#d62828;
+margin-bottom:20px;
+}
+
+.progress{
+width:100%;
+background:#ddd;
+height:20px;
+border-radius:10px;
+overflow:hidden;
+margin-bottom:20px;
+}
+
+.progress-bar{
+height:100%;
+width:0%;
+background:#2a9d8f;
+}
+
+.question{
+margin-bottom:25px;
+padding:15px;
+border:1px solid #ddd;
+border-radius:8px;
+}
+
+.question h3{
+margin-top:0;
+}
+
+.option{
+margin:8px 0;
+}
+
+button{
+display:block;
+margin:auto;
+padding:15px 30px;
+font-size:18px;
+background:#2a9d8f;
+color:white;
+border:none;
+border-radius:8px;
+cursor:pointer;
+}
+
+button:hover{
+background:#21867a;
+}
+
+#resultado{
+margin-top:30px;
+padding:20px;
+display:none;
+border:2px solid #2a9d8f;
+border-radius:10px;
+background:#f8fffd;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h1>Simulador de Admisión UANL</h1>
+
+<div id="timer">03:00:00</div>
+
+<div class="progress">
+<div class="progress-bar" id="progressBar"></div>
+</div>
+
+<form id="quizForm"></form>
+
+<button onclick="terminarExamen()">Terminar examen</button>
+
+<div id="resultado"></div>
+
+</div>
+
+<script>
+
+const preguntas = [
+
+{
+pregunta:"1. ¿Cuál es la idea principal de un texto?",
+opciones:[
+"La información menos relevante",
+"El mensaje central que desarrolla el autor",
+"Una opinión del lector",
+"Una conclusión opcional"
+],
+correcta:1
+},
+
+{
+pregunta:"2. ¿Cuál es un sinónimo de 'feliz'?",
+opciones:[
+"Triste",
+"Alegre",
+"Molesto",
+"Temeroso"
+],
+correcta:1
+},
+
+{
+pregunta:"3. ¿Cuál es un antónimo de 'abundante'?",
+opciones:[
+"Escaso",
+"Grande",
+"Amplio",
+"Numeroso"
+],
+correcta:0
+},
+
+{
+pregunta:"4. Selecciona la palabra correctamente escrita.",
+opciones:[
+"Haver",
+"Habér",
+"Haber",
+"Aver"
+],
+correcta:2
+},
+
+{
+pregunta:"5. ¿Qué tipo de oración es: '¡Qué hermoso paisaje!'?",
+opciones:[
+"Interrogativa",
+"Imperativa",
+"Exclamativa",
+"Declarativa"
+],
+correcta:2
+},
+
+{
+pregunta:"6. ¿Cuál es el sujeto en la oración 'María estudia matemáticas'?",
+opciones:[
+"Estudia",
+"Matemáticas",
+"María",
+"Ninguno"
+],
+correcta:2
+},
+
+{
+pregunta:"7. ¿Qué palabra es homófona de 'votar'?",
+opciones:[
+"Botar",
+"Volar",
+"Rotar",
+"Notar"
+],
+correcta:0
+},
+
+{
+pregunta:"8. ¿Cuál es el plural correcto de 'lápiz'?",
+opciones:[
+"Lápizes",
+"Lápizs",
+"Lápices",
+"Lapices"
+],
+correcta:2
+},
+
+{
+pregunta:"9. ¿Qué recurso consiste en expresar con otras palabras una idea?",
+opciones:[
+"Resumen",
+"Paráfrasis",
+"Crónica",
+"Debate"
+],
+correcta:1
+},
+
+{
+pregunta:"10. ¿Cuál es un texto periodístico?",
+opciones:[
+"Novela",
+"Poema",
+"Noticia",
+"Leyenda"
+],
+correcta:2
+},
+
+{
+pregunta:"11. 25 + 37 =",
+opciones:[
+"52",
+"62",
+"72",
+"82"
+],
+correcta:1
+},
+
+{
+pregunta:"12. 84 ÷ 7 =",
+opciones:[
+"11",
+"12",
+"13",
+"14"
+],
+correcta:1
+},
+
+{
+pregunta:"13. 9² =",
+opciones:[
+"18",
+"27",
+"81",
+"72"
+],
+correcta:2
+},
+
+{
+pregunta:"14. √144 =",
+opciones:[
+"10",
+"11",
+"12",
+"14"
+],
+correcta:2
+},
+
+{
+pregunta:"15. MCD(12,18)=",
+opciones:[
+"3",
+"6",
+"12",
+"18"
+],
+correcta:1
+},
+
+{
+pregunta:"16. MCM(4,6)=",
+opciones:[
+"12",
+"24",
+"18",
+"8"
+],
+correcta:0
+},
+
+{
+pregunta:"17. Resuelve: 3x + 5 = 20",
+opciones:[
+"3",
+"4",
+"5",
+"6"
+],
+correcta:2
+},
+
+{
+pregunta:"18. Si x=4, ¿cuánto vale 2x+3?",
+opciones:[
+"9",
+"10",
+"11",
+"12"
+],
+correcta:2
+},
+
+{
+pregunta:"19. Un triángulo rectángulo tiene catetos de 3 y 4. La hipotenusa es:",
+opciones:[
+"5",
+"6",
+"7",
+"8"
+],
+correcta:0
+},
+
+{
+pregunta:"20. El valor absoluto de -8 es:",
+opciones:[
+"-8",
+"0",
+"8",
+"16"
+],
+correcta:2
+},
+
+{
+pregunta:"21. ¿Cuál es un número primo?",
+opciones:[
+"15",
+"21",
+"17",
+"27"
+],
+correcta:2
+},
+
+{
+pregunta:"22. ¿Cuál es la media de 4,6,8?",
+opciones:[
+"5",
+"6",
+"7",
+"8"
+],
+correcta:1
+},
+
+{
+pregunta:"23. Probabilidad de obtener águila al lanzar una moneda.",
+opciones:[
+"1",
+"1/2",
+"1/3",
+"1/4"
+],
+correcta:1
+},
+
+{
+pregunta:"24. ¿Cuál es el resultado de (-5)+8?",
+opciones:[
+"13",
+"-13",
+"3",
+"-3"
+],
+correcta:2
+},
+
+{
+pregunta:"25. ¿Qué reino incluye a los hongos?",
+opciones:[
+"Animalia",
+"Plantae",
+"Protista",
+"Fungi"
+],
+correcta:3
+},
+
+{
+pregunta:"26. ¿Quién consolidó la democracia en Atenas?",
+opciones:[
+"Aristóteles",
+"Pericles",
+"Homero",
+"Platón"
+],
+correcta:1
+},
+
+{
+pregunta:"27. ¿Qué civilización desarrolló la escritura jeroglífica?",
+opciones:[
+"China",
+"India",
+"Egipto",
+"Roma"
+],
+correcta:2
+},
+
+{
+pregunta:"28. ¿Qué ciencia estudia las relaciones entre seres vivos y ambiente?",
+opciones:[
+"Geología",
+"Ecología",
+"Astronomía",
+"Genética"
+],
+correcta:1
+}
+
+,
+
+{
+pregunta:"29. Lee: 'La lectura fortalece la capacidad crítica y amplía el conocimiento'. ¿Cuál es la idea principal?",
+opciones:[
+"La lectura es una actividad aburrida",
+"La lectura fortalece el pensamiento y el conocimiento",
+"La crítica destruye el conocimiento",
+"Leer solo sirve para entretener"
+],
+correcta:1
+},
+
+{
+pregunta:"30. Sinónimo de 'persuadir'.",
+opciones:[
+"Convencer",
+"Obligar",
+"Ignorar",
+"Ocultar"
+],
+correcta:0
+},
+
+{
+pregunta:"31. Antónimo de 'benevolente'.",
+opciones:[
+"Amable",
+"Bondadoso",
+"Cruel",
+"Paciente"
+],
+correcta:2
+},
+
+{
+pregunta:"32. ¿Cuál palabra está correctamente acentuada?",
+opciones:[
+"Exámen",
+"Jovenes",
+"Árbol",
+"Lapiz"
+],
+correcta:2
+},
+
+{
+pregunta:"33. ¿Qué tipo de palabra es 'rápidamente'?",
+opciones:[
+"Sustantivo",
+"Adjetivo",
+"Verbo",
+"Adverbio"
+],
+correcta:3
+},
+
+{
+pregunta:"34. ¿Cuál oración está escrita correctamente?",
+opciones:[
+"Hubieron muchos asistentes",
+"Habían muchas personas",
+"Hubo muchos asistentes",
+"Hubieron personas presentes"
+],
+correcta:2
+},
+
+{
+pregunta:"35. El sujeto de 'Los alumnos resolvieron el examen' es:",
+opciones:[
+"Resolvieron",
+"El examen",
+"Los alumnos",
+"Alumnos resolvieron"
+],
+correcta:2
+},
+
+{
+pregunta:"36. ¿Cuál palabra es un homónimo?",
+opciones:[
+"Banco",
+"Perro",
+"Mesa",
+"Libro"
+],
+correcta:0
+},
+
+{
+pregunta:"37. ¿Qué función tiene un texto argumentativo?",
+opciones:[
+"Narrar hechos",
+"Dar instrucciones",
+"Convencer mediante razones",
+"Describir lugares"
+],
+correcta:2
+},
+
+{
+pregunta:"38. ¿Qué signo se utiliza para una pregunta?",
+opciones:[
+"()",
+"¿?",
+"[]",
+"<>"
+],
+correcta:1
+},
+
+{
+pregunta:"39. Resuelve: 7(3)+5",
+opciones:[
+"21",
+"24",
+"26",
+"28"
+],
+correcta:2
+},
+
+{
+pregunta:"40. Simplifica: 4x + 3x",
+opciones:[
+"7x",
+"12x",
+"4x²",
+"7"
+],
+correcta:0
+},
+
+{
+pregunta:"41. Resuelve: 2x - 8 = 12",
+opciones:[
+"8",
+"10",
+"12",
+"6"
+],
+correcta:1
+},
+
+{
+pregunta:"42. ¿Cuánto es 15% de 200?",
+opciones:[
+"20",
+"25",
+"30",
+"35"
+],
+correcta:2
+},
+
+{
+pregunta:"43. Un artículo cuesta $500 y tiene descuento del 20%. ¿Precio final?",
+opciones:[
+"450",
+"400",
+"350",
+"300"
+],
+correcta:1
+},
+
+{
+pregunta:"44. ¿Cuál fracción equivale a 0.75?",
+opciones:[
+"1/2",
+"2/3",
+"3/4",
+"4/5"
+],
+correcta:2
+},
+
+{
+pregunta:"45. Resuelve: 5² - 3²",
+opciones:[
+"16",
+"18",
+"20",
+"22"
+],
+correcta:0
+},
+
+{
+pregunta:"46. El área de un rectángulo de 8 y 5 es:",
+opciones:[
+"13",
+"26",
+"40",
+"80"
+],
+correcta:2
+},
+
+{
+pregunta:"47. Si un triángulo tiene base 10 y altura 8, su área es:",
+opciones:[
+"40",
+"80",
+"20",
+"30"
+],
+correcta:0
+},
+
+{
+pregunta:"48. ¿Cuál es la mediana de 2,4,6,8,10?",
+opciones:[
+"4",
+"5",
+"6",
+"8"
+],
+correcta:2
+},
+
+{
+pregunta:"49. En un dado, la probabilidad de obtener un número par es:",
+opciones:[
+"1/6",
+"1/3",
+"1/2",
+"2/3"
+],
+correcta:2
+},
+
+{
+pregunta:"50. Resuelve: (-7)+(-5)",
+opciones:[
+"-12",
+"12",
+"-2",
+"2"
+],
+correcta:0
+},
+
+{
+pregunta:"51. ¿Qué científico propuso la teoría de la evolución por selección natural?",
+opciones:[
+"Newton",
+"Einstein",
+"Darwin",
+"Mendel"
+],
+correcta:2
+},
+
+{
+pregunta:"52. ¿Cuál órgano bombea sangre al cuerpo?",
+opciones:[
+"Pulmón",
+"Hígado",
+"Riñón",
+"Corazón"
+],
+correcta:3
+},
+
+{
+pregunta:"53. ¿Qué civilización creó la escritura cuneiforme?",
+opciones:[
+"Egipto",
+"Mesopotamia",
+"Grecia",
+"Roma"
+],
+correcta:1
+},
+
+{
+pregunta:"54. ¿Quién fue el fundador legendario de Roma?",
+opciones:[
+"Pericles",
+"Julio César",
+"Rómulo",
+"Augusto"
+],
+correcta:2
+},
+
+{
+pregunta:"55. ¿Cuál es la capital de México?",
+opciones:[
+"Monterrey",
+"Guadalajara",
+"Toluca",
+"Ciudad de México"
+],
+correcta:3
+}
+
+];
+
+const form = document.getElementById("quizForm");
+
+preguntas.forEach((q,index)=>{
+let div=document.createElement("div");
+div.className="question";
+
+let html=`<h3>${q.pregunta}</h3>`;
+
+q.opciones.forEach((op,i)=>{
+html+=`
+<div class="option">
+<label>
+<input type="radio" name="q${index}" value="${i}">
+${op}
+</label>
+</div>`;
+});
+
+div.innerHTML=html;
+form.appendChild(div);
+});
+
+function actualizarBarra(){
+const respondidas =
+document.querySelectorAll('input[type=radio]:checked').length;
+
+const porcentaje =
+(respondidas/preguntas.length)*100;
+
+document.getElementById("progressBar").style.width =
+porcentaje+"%";
+}
+
+document.addEventListener("change",actualizarBarra);
+
+function terminarExamen(){
+
+let aciertos=0;
+
+preguntas.forEach((q,index)=>{
+
+let seleccion =
+document.querySelector(`input[name=q${index}]:checked`);
+
+if(seleccion &&
+parseInt(seleccion.value)===q.correcta){
+aciertos++;
+}
+
+});
+
+let errores =
+preguntas.length-aciertos;
+
+let porcentaje =
+((aciertos/preguntas.length)*100).toFixed(1);
+
+const resultado =
+document.getElementById("resultado");
+
+resultado.style.display="block";
+
+resultado.innerHTML=`
+<h2>Resultado</h2>
+<p><b>Aciertos:</b> ${aciertos}</p>
+<p><b>Errores:</b> ${errores}</p>
+<p><b>Porcentaje:</b> ${porcentaje}%</p>
+`;
+window.scrollTo(0,document.body.scrollHeight);
+}
+
+let tiempo=10800;
+
+setInterval(()=>{
+let h=Math.floor(tiempo/3600);
+let m=Math.floor((tiempo%3600)/60);
+let s=tiempo%60;
+
+document.getElementById("timer").innerText=
+String(h).padStart(2,'0')+":"+
+String(m).padStart(2,'0')+":"+
+String(s).padStart(2,'0');
+
+if(tiempo>0){
+tiempo--;
+}
+},1000);
+
+</script>
+
+</body>
+</html>
