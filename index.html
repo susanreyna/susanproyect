@@ -762,41 +762,101 @@ document.addEventListener("change",actualizarBarra);
 function terminarExamen(){
 
 let aciertos = 0;
-let detalle = "";
+
+let estadisticas = {
+"Español": {correctas:0,total:0},
+"Matemáticas": {correctas:0,total:0},
+"Ciencias": {correctas:0,total:0},
+"Sociales": {correctas:0,total:0}
+};
 
 preguntas.forEach((q,index)=>{
+
+if(!estadisticas[q.area]){
+estadisticas[q.area] = {
+correctas:0,
+total:0
+};
+}
+
+estadisticas[q.area].total++;
 
 let seleccion =
 document.querySelector(`input[name=q${index}]:checked`);
 
-let respuestaUsuario =
-seleccion ? parseInt(seleccion.value) : -1;
-
-if(respuestaUsuario === q.correcta){
+if(
+seleccion &&
+parseInt(seleccion.value) === q.correcta
+){
 
 aciertos++;
+estadisticas[q.area].correctas++;
 
-}else{
+}
 
-detalle += `
-<div style="margin-bottom:15px;padding:10px;border-left:4px solid #d62828;background:#fff5f5;">
-<b>${q.pregunta}</b><br>
+});
 
-Tu respuesta:
-${respuestaUsuario >= 0
-? q.opciones[respuestaUsuario]
-: "Sin responder"}
-<br>
+let errores =
+preguntas.length - aciertos;
 
-<span style="color:green;">
-Respuesta correcta:
-${q.opciones[q.correcta]}
-</span>
-</div>
+let porcentaje =
+((aciertos/preguntas.length)*100).toFixed(1);
+
+let resumenAreas = "";
+
+Object.keys(estadisticas).forEach(area=>{
+
+let datos = estadisticas[area];
+
+if(datos.total > 0){
+
+let porcentajeArea =
+(
+(datos.correctas/datos.total)*100
+).toFixed(1);
+
+resumenAreas += `
+<tr>
+<td>${area}</td>
+<td>${datos.correctas}/${datos.total}</td>
+<td>${porcentajeArea}%</td>
+</tr>
 `;
 
 }
 
+});
+
+const resultado =
+document.getElementById("resultado");
+
+resultado.style.display = "block";
+
+resultado.innerHTML = `
+<h2>Resultado General</h2>
+
+<p><b>Aciertos:</b> ${aciertos}</p>
+<p><b>Errores:</b> ${errores}</p>
+<p><b>Porcentaje:</b> ${porcentaje}%</p>
+
+<h3>Desempeño por área</h3>
+
+<table border="1"
+style="width:100%;border-collapse:collapse;text-align:center;">
+<tr>
+<th>Área</th>
+<th>Aciertos</th>
+<th>Porcentaje</th>
+</tr>
+
+${resumenAreas}
+
+</table>
+`;
+
+window.scrollTo(0,0);
+
+}
 });
 
 let errores = preguntas.length - aciertos;
